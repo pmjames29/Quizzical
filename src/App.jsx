@@ -16,11 +16,11 @@ export default function App() {
   // State for checking if the user has selected to check their answers
   const [checkedAnswers, setCheckedAnswers] = React.useState(false)
 
-  // State used for triggering a reload of questions to play the quiz again
-  const [togglePlayAgain, setTogglePlayAgain] = React.useState(false)
-
   // State that keeps track of the user's quiz score
   const [score, setScore] = React.useState('0')
+
+  // State to check if the API needs to be fetched
+  const [needsFetching, setNeedsFetching] = React.useState(false)
 
 
 
@@ -28,10 +28,14 @@ export default function App() {
   // questions from a database, which is triggered when togglePlayAgain is 
   // flipped
   React.useEffect(() => {
-    fetch('https://opentdb.com/api.php?amount=5&type=multiple')
+    if (needsFetching) {
+      fetch('https://opentdb.com/api.php?amount=5&type=multiple')
       .then(res => res.json())
       .then(data => setQuestionsData(data.results))
-  }, [togglePlayAgain])
+      setNeedsFetching(false)
+    }
+    
+  }, [needsFetching])
 
   // Effect used to modify the data from the API into an easily usable form
   // whenever a call to the database is made
@@ -69,6 +73,7 @@ export default function App() {
   // Function to toggle if the intro page is showing
   function toggleIntro() {
     setIsOnIntro(prevIsOnIntro => !prevIsOnIntro)
+    setNeedsFetching(true)
   }
 
   // Used to check the answers of the quiz, and calculate the score
@@ -91,7 +96,7 @@ export default function App() {
   // It changes the togglePlayAgain state, which will trigger another
   // API call in order to load different questions
   function toggleReplay() {
-    setTogglePlayAgain(prevPlayAgain => !prevPlayAgain)
+    setNeedsFetching(true)
     setCheckedAnswers(prevCheckedAnswers => !prevCheckedAnswers)
     setAllQuestions([])
   }
